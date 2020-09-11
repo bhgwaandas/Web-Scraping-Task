@@ -1,0 +1,82 @@
+#Importing required libraries
+import requests as req
+import pandas as pd
+from bs4 import BeautifulSoup
+!pip install selenium
+from selenium import webdriver
+import itertools
+
+#Starting the URL iterator
+for x in itertools.count(start=1):
+    URL = "https://www.aasaanjobs.com/s/jobs/?sort=date&page=x"
+    
+    #Try-Except for ending the loop when all jobs are scrapped
+    try r = req.get(URL):
+        soup = BeautifulSoup(r.content)
+        #Getting the links from the webpage
+        all_links = soup.find_all("a", class_="track-clevertap text-semibold text-gray-darker break-words js-no-action track-search-click line-height-20 js-job-title font-size-14")
+        
+        #Initializing list for links
+        all_links_href = []
+        
+        #Appending links to initialized list
+        for link in all_links:
+            all_links_href.append(link.get("href"))
+
+    
+        path = "C:\Program Files (x86)\chromedriver.exe"
+        driver = webdriver.Chrome(path)
+        
+        #Opening the links in list
+        for i in all_links_href:
+            driver.get("https://www.aasaanjobs.com" + i)
+            print(driver.title)
+
+            #Extracting Job Title
+            try:
+                html = driver.page_source
+                soup = BeautifulSoup(html, "lxml")
+                title = soup.find("p", {"class":"h4 flex-center"}).text
+                title = title.strip("\n")
+            except:
+                None
+
+            #Extracting Description
+            try:
+                html = driver.page_source
+                soup = BeautifulSoup(html, "lxml")
+                description = soup.find("div", {"class" : "col-xs-12 p-y-axis-sm break-words"}).text
+            except:
+                None
+
+
+            #Extracting experience
+            try:
+                html = driver.page_source
+                soup = BeautifulSoup(html, "lxml")
+                top_req = soup.find_all("p", {"class" : "m-bottom-0 text-gray"})
+                experience = top_req[1].text
+                if experience.find("| Resume Required\n"):
+                    experience = experience.strip("| Resume Required\n")
+                else:
+                    experience = experience.strip("\n")
+            except:
+                None
+
+
+            #Extracting Department
+            try:
+                html = driver.page_source
+                soup = BeautifulSoup(html, "lxml")
+                header = soup.find_all("a", {"class" : "text-white m-right-5"})
+                department = header[1].text
+            except:
+                None
+
+            df = df.append({"Title": title, "Experience": experience, "Department": department, "Job Description": description}, ignore_index=True)
+    
+    except:
+        pass
+        break
+    return df
+        
