@@ -6,12 +6,15 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 import itertools
 
+df = pd.DataFrame(columns=["Title", "Experience", "Department", "Job Description"])
+
 #Starting the URL iterator
 for x in itertools.count(start=1):
-    URL = "https://www.aasaanjobs.com/s/jobs/?sort=date&page=x"
+    URL = "https://www.aasaanjobs.com/s/jobs/?sort=date&page=" + str(x)
     
     #Try-Except for ending the loop when all jobs are scrapped
-    try r = req.get(URL):
+    try:
+        r = req.get(URL)
         soup = BeautifulSoup(r.content)
         #Getting the links from the webpage
         all_links = soup.find_all("a", class_="track-clevertap text-semibold text-gray-darker break-words js-no-action track-search-click line-height-20 js-job-title font-size-14")
@@ -78,5 +81,5 @@ for x in itertools.count(start=1):
     except:
         pass
         break
-    return df
+    
         
